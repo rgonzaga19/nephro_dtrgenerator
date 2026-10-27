@@ -167,7 +167,7 @@ table.sheet { font-size:13px; }
 .hint,.status { color:var(--muted); }
 @media(max-width:900px) { body { padding:22px 16px 36px; } .layout { grid-template-columns:minmax(0,1fr); } }
 @media(max-width:560px) { .app>header { padding-left:50px; } h1 { font-size:25px; } .stats { grid-template-columns:repeat(2,minmax(0,1fr)); } .namebar { align-items:stretch; flex-direction:column; gap:6px; } }
-</style></head><body>
+.site-footer { display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; padding:15px 2px 0; border-top:1px solid var(--line); color:var(--muted); font-size:12px; }</style></head><body>
 
 <main class="app">
   <header>
@@ -230,6 +230,7 @@ table.sheet { font-size:13px; }
       <p class="status" id="status" role="status"></p>
     </section>
   </div>
+<footer class="site-footer"><span>© 2026 Romel</span><span>Developed by Romel</span></footer>
 </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
