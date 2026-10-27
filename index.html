@@ -1,28 +1,18 @@
 <!doctype html><html data-theme="light"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><title>DTR Generator</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Carlito:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="assets/css/styles.css">
+<link rel="stylesheet" href="assets/css/styles.css?v=12">
 </head><body>
 
 <main class="app">
   <header>
+    <button type="button" class="theme-toggle" id="themeToggle" role="switch" aria-label="Dark mode" aria-checked="false" title="Toggle dark mode"><span class="theme-toggle-thumb" aria-hidden="true"></span></button>
     <h1>DTR Generator</h1>
     <p class="lede">Upload the biometric punch log. The first scan of each day becomes Time-In, the last becomes Time-Out, and the payroll sheet is built in your DTR layout.</p>
   </header>
 
-  <div class="layout">
+  <div class="layout" id="layout">
     <div class="rail">
-      <section class="panel" aria-labelledby="h-up">
-        <h2 class="eyebrow" id="h-up">Punch log</h2>
-        <input class="vh" type="file" id="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
-        <label class="drop" id="drop" for="file">
-          <strong>Choose the .xlsx file</strong>
-          <span>or drop it here. Needs the Name and Date/Time columns.</span>
-        </label>
-        <p class="err" id="msg" role="alert" hidden></p>
-        <button type="button" class="btn small" id="btnClear">Clear</button>
-      </section>
-
       <section class="panel" aria-labelledby="h-opt">
         <h2 class="eyebrow" id="h-opt">Pay period and rules</h2>
         <div class="fields">
@@ -46,17 +36,36 @@
           </div>
         </div>
       </section>
+
+      <section class="panel" aria-labelledby="h-up">
+        <h2 class="eyebrow" id="h-up">Punch log</h2>
+        <input class="vh" type="file" id="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" disabled>
+        <label class="drop" id="drop" for="file" aria-disabled="true">
+          <strong>Choose the .xlsx file</strong>
+          <span id="uploadHint">Enter a valid pay period above to enable upload.</span>
+        </label>
+        <p class="err" id="msg" role="alert" hidden></p>
+        <button type="button" class="btn small" id="btnClear">Clear</button>
+        <button type="button" class="btn small" id="btnSample">Show sample</button>
+      </section>
     </div>
 
-    <section class="result" aria-label="Preview">
-      <p class="source" id="source"></p>
-      <div class="tabs" id="tabs" role="tablist" aria-label="Employees" hidden></div>
-      <div class="namebar">
-        <label for="nameInput">Name on sheet</label>
-        <input type="text" id="nameInput" autocomplete="off" spellcheck="false">
+    <div class="empty-preview" id="emptyPreview" aria-label="Preview placeholder">
+      <span class="empty-preview-mark" aria-hidden="true">DTR</span>
+      <strong>Your DTR preview will appear here</strong>
+      <span>Upload a punch log or choose “Show sample” to get started.</span>
+    </div>
+    <section class="result" id="result" aria-label="Preview">
+      <div class="preview-summary">
+        <p class="source" id="source"></p>
+        <div class="tabs" id="tabs" role="tablist" aria-label="Employees" hidden></div>
+        <div class="namebar">
+          <label for="nameInput">Name on sheet</label>
+          <input type="text" id="nameInput" autocomplete="off" spellcheck="false">
+        </div>
+        <dl class="stats" id="stats"></dl>
+        <ul class="flags" id="flags"></ul>
       </div>
-      <dl class="stats" id="stats"></dl>
-      <ul class="flags" id="flags"></ul>
       <div class="sheetwrap" id="sheetwrap"></div>
       <div class="actions">
         <button type="button" class="btn primary" id="btnDownload">Download .xlsx</button>
@@ -69,5 +78,5 @@
 </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
-<script src="assets/js/app.js"></script>
+<script src="assets/js/app.js?v=6"></script>
 </body></html>

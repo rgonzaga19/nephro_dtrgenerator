@@ -357,6 +357,16 @@
   function setPeriod(p) { $('optStart').value = p.start; $('optEnd').value = p.end; }
   function showMsg(text) { var m = $('msg'); m.hidden = !text; m.textContent = text || ''; }
   function setStatus(text) { $('status').textContent = text || ''; }
+  function updateUploadAvailability() {
+    var enabled = !period().error;
+    $('file').disabled = !enabled;
+    $('drop').setAttribute('aria-disabled', enabled ? 'false' : 'true');
+    $('btnAuto').disabled = !state.punches.length;
+    $('btnWhole').disabled = !state.punches.length;
+    $('uploadHint').textContent = enabled
+      ? 'or drop it here. Needs the Name and Date/Time columns.'
+      : 'Enter a valid pay period above to enable upload.';
+  }
 
   function load(punches, meta) {
     meta = meta || {};
@@ -366,7 +376,7 @@
     state.skipped = meta.skipped || 0;
     state.names = {};
     state.active = 0;
-    setPeriod(D.detectPeriod(state.punches));
+    if (meta.source !== 'file') setPeriod(D.detectPeriod(state.punches));
     regroup();
     render();
   }
@@ -382,18 +392,24 @@
   }
 
   function clearAll() {
-    state.punches = exampleLog(); state.names = {}; state.active = 0;
-    state.source = 'example'; state.fileName = ''; state.skipped = 0;
+    state.punches = []; state.names = {}; state.employees = []; state.active = 0;
+    state.source = ''; state.fileName = ''; state.skipped = 0;
     $('file').value = '';
+    $('optStart').value = ''; $('optEnd').value = '';
     $('optDuty').value = '8.5'; $('optRate').value = '0';
     $('optTrunc').checked = true; $('optNight').checked = false;
     $('optCut').value = '10'; $('cutWrap').hidden = true;
-    setPeriod(D.detectPeriod(state.punches)); regroup(); render();
-    showMsg(''); setStatus('Form cleared.');
+    $('nameInput').value = '';
+    updateUploadAvailability(); render(); showMsg(''); setStatus('');
   }
 
   async function onFile(file) {
     if (!file) return;
+    if (period().error) {
+      showMsg('Enter a valid pay period before uploading a punch log.');
+      $('file').value = '';
+      return;
+    }
     showMsg(''); setStatus('Reading ' + file.name + '…');
     try {
       var buf = await file.arrayBuffer();
@@ -413,12 +429,16 @@
 
   /* ---------- render ---------- */
   function render() {
+    updateUploadAvailability();
+    $('result').hidden = !state.source;
+    $('emptyPreview').hidden = !!state.source;
     renderSource(); renderTabs(); renderNameInput(); renderSheet();
   }
 
   function renderSource() {
     var s = $('source'); s.textContent = '';
     var emps = state.employees.length;
+    if (!state.source) return;
     if (state.source === 'example') {
       s.appendChild(el('span', 'pill', 'Sample'));
       s.appendChild(el('span', null, 'Sample data only. Upload your file to replace it.'));
@@ -541,9 +561,13 @@
   var drop = $('drop');
   ['dragenter', 'dragover'].forEach(function (t) { drop.addEventListener(t, function (ev) { ev.preventDefault(); drop.classList.add('over'); }); });
   ['dragleave', 'drop'].forEach(function (t) { drop.addEventListener(t, function (ev) { ev.preventDefault(); drop.classList.remove('over'); }); });
-  drop.addEventListener('drop', function (ev) { onFile(ev.dataTransfer && ev.dataTransfer.files[0]); });
+  drop.addEventListener('drop', function (ev) {
+    ev.preventDefault(); drop.classList.remove('over');
+    if (period().error) { showMsg('Enter a valid pay period before uploading a punch log.'); return; }
+    onFile(ev.dataTransfer && ev.dataTransfer.files[0]);
+  });
 
-  ['optStart', 'optEnd', 'optDuty', 'optRate', 'optTrunc'].forEach(function (id) { $(id).addEventListener('input', function () { renderSheet(); }); });
+  ['optStart', 'optEnd', 'optDuty', 'optRate', 'optTrunc'].forEach(function (id) { $(id).addEventListener('input', function () { updateUploadAvailability(); renderSheet(); }); });
   ['optNight', 'optCut'].forEach(function (id) {
     $(id).addEventListener('change', function () { $('cutWrap').hidden = !$('optNight').checked; regroup(); render(); });
   });
@@ -556,6 +580,19 @@
   });
   $('btnDownload').addEventListener('click', download);
   $('btnClear').addEventListener('click', clearAll);
+  $('btnSample').addEventListener('click', function () { load(exampleLog(), { source: 'example' }); showMsg(''); setStatus('Sample data loaded.'); });
 
-  load(exampleLog(), { source: 'example' });
+  function setTheme(theme) {
+    var dark = theme === 'dark';
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    $('themeToggle').setAttribute('aria-checked', dark ? 'true' : 'false');
+    try { localStorage.setItem('dtr-theme', dark ? 'dark' : 'light'); } catch (err) { /* storage may be unavailable */ }
+  }
+  $('themeToggle').addEventListener('click', function () {
+    setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  });
+  try { setTheme(localStorage.getItem('dtr-theme') === 'dark' ? 'dark' : 'light'); }
+  catch (err) { setTheme('light'); }
+
+  clearAll();
 })();
